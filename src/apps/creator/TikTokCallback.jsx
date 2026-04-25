@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db } from '../../services/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../shared/AuthContext';
+import toast from 'react-hot-toast';
 
 const TikTokCallback = () => {
   const [searchParams] = useSearchParams();
