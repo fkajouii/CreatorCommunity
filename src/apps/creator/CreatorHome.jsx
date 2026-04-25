@@ -1,13 +1,31 @@
-import React from 'react';
-import { Sparkles, ArrowRight, Video, FileText, Share2, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, ArrowRight, Video, FileText, Share2, DollarSign, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { connectTikTokAccount } from '../../services/videoService';
 import { createStripeAccount } from '../../services/payoutService';
 import { useAuth } from '../../shared/AuthContext';
+import { db } from '../../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const CreatorHome = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [creatorData, setCreatorData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCreator = async () => {
+      if (user) {
+        const docRef = doc(db, 'creators', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setCreatorData(docSnap.data());
+        }
+        setLoading(false);
+      }
+    };
+    fetchCreator();
+  }, [user]);
 
   const handleStripeOnboarding = async () => {
     if (user) {
@@ -21,7 +39,7 @@ const CreatorHome = () => {
       {/* Welcome Hero */}
       <section className="bg-pok-blue rounded-[2.5rem] p-8 lg:p-12 text-white relative overflow-hidden">
         <div className="relative z-10 max-w-xl">
-          <h2 className="text-4xl lg:text-5xl font-black mb-4">Welcome to the family, Alex! 🎨</h2>
+          <h2 className="text-4xl lg:text-5xl font-black mb-4">Welcome to the family, {creatorData?.name || 'Creator'}! 🎨</h2>
           <p className="text-blue-100 text-lg mb-8">
             We're so excited to have you creating magic for Pok Pok. Your journey to sparking curiosity starts here.
           </p>
@@ -40,6 +58,7 @@ const CreatorHome = () => {
       </section>
 
       {/* TikTok Connection Prompt (Optional/Conditional) */}
+      {!creatorData?.tiktokConnected ? (
       <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <div className="bg-black p-4 rounded-2xl">
@@ -57,6 +76,19 @@ const CreatorHome = () => {
           Connect Now
         </button>
       </section>
+      ) : (
+        <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <div className="bg-pok-green p-4 rounded-2xl">
+              <CheckCircle className="text-white h-8 w-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">TikTok Connected</h3>
+              <p className="text-gray-500">Linked as @{creatorData.tiktokHandle}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Stripe Connection Prompt */}
       <section className="bg-pok-green/5 p-8 rounded-[2rem] shadow-sm border border-pok-green/20 flex items-center justify-between">
@@ -116,15 +148,17 @@ const CreatorHome = () => {
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <p className="text-3xl font-black text-pok-blue">12.5k</p>
+            <p className="text-3xl font-black text-pok-blue">
+              {creatorData?.totalViews > 1000 ? `${(creatorData.totalViews/1000).toFixed(1)}k` : creatorData?.totalViews || 0}
+            </p>
             <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Total Views</p>
           </div>
           <div className="text-center border-x border-gray-100">
-            <p className="text-3xl font-black text-pok-blue">3</p>
+            <p className="text-3xl font-black text-pok-blue">{creatorData?.videoCount || 0}</p>
             <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Videos</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-black text-pok-green">$150</p>
+            <p className="text-3xl font-black text-pok-green">${creatorData?.totalEarned || 0}</p>
             <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Earned</p>
           </div>
         </div>
