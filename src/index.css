@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pok-yellow: #FFCB05;
+  --color-pok-blue: #3C5AA6;
+  --color-pok-light-blue: #2A75BB;
+  --color-pok-red: #E3350D;
+  --color-pok-green: #4DAD5B;
+  --color-pok-dark: #313131;
+  --color-pok-bg: #F5F5F5;
+
+  --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
+}
+
+@layer base {
+  body {
+    @apply bg-pok-bg text-pok-dark font-sans;
+  }
+}
