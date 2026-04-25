@@ -9,9 +9,17 @@ import {
   Bell
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useAuth } from '../../shared/AuthContext';
 
 const CreatorLayout = ({ children }) => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   const navItems = [
     { name: 'Home', icon: Home, path: '/portal' },
     { name: 'Agreement', icon: FileCheck, path: '/portal/agreement' },
@@ -60,7 +68,7 @@ const CreatorLayout = ({ children }) => {
 
           <div className="p-6">
             <button 
-              onClick={() => navigate('/admin')}
+              onClick={handleLogout}
               className="flex items-center w-full px-6 py-4 text-gray-500 font-bold hover:text-pok-red transition-colors"
             >
               <LogOut className="mr-4 h-6 w-6" />
