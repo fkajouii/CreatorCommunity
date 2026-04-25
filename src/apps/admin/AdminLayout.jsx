@@ -16,13 +16,14 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../shared/AuthContext';
+import { Link } from 'react-router-dom';
 
 const AdminLayout = ({ children }) => {
-  const { signOut } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut();
+    await logout();
     navigate('/login');
   };
 
@@ -85,10 +86,13 @@ const AdminLayout = ({ children }) => {
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-pok-blue sm:text-sm"
             />
           </div>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pok-blue hover:bg-pok-light-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pok-blue">
+          <Link 
+            to="/admin/discover"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pok-blue hover:bg-pok-light-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pok-blue"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Creator
-          </button>
+          </Link>
         </header>
         <div className="p-8">
           {children}
