@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
-  const { loginWithGoogle, sendMagicLink, completeMagicLinkSignIn } = useAuth();
+  const { loginWithGoogle, sendMagicLink, completeMagicLinkSignIn, isAdmin, user } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const navigate = useNavigate();
@@ -15,7 +15,6 @@ const LoginPage = () => {
         const result = await completeMagicLinkSignIn();
         if (result) {
           toast.success("Signed in successfully!");
-          navigate('/');
         }
       } catch (error) {
         console.error("Magic link error:", error);
@@ -23,6 +22,17 @@ const LoginPage = () => {
     };
     handleMagicLink();
   }, []);
+
+  // Handle Redirection when auth state is resolved
+  useEffect(() => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/portal');
+      }
+    }
+  }, [user, isAdmin, navigate]);
 
   const handleGoogleLogin = async () => {
     try {
