@@ -1,17 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../shared/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, sendMagicLink, completeMagicLinkSignIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    const handleMagicLink = async () => {
+      try {
+        const result = await completeMagicLinkSignIn();
+        if (result) {
+          toast.success("Signed in successfully!");
+          navigate('/');
+        }
+      } catch (error) {
+        console.error("Magic link error:", error);
+      }
+    };
+    handleMagicLink();
+  }, []);
+
+  const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
       navigate('/');
     } catch (error) {
       console.error("Login failed:", error);
+    }
+  };
+
+  const handleMagicLink = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    try {
+      await sendMagicLink(email);
+      setSent(true);
+      toast.success("Magic link sent! Check your email.");
+    } catch (error) {
+      console.error("Magic link failed:", error);
+      toast.error("Failed to send link. Check your email format.");
     }
   };
 
@@ -31,8 +62,32 @@ const LoginPage = () => {
           <p className="text-gray-500 mt-2">Sign in to manage your creator journey or organization.</p>
         </div>
 
+        <form onSubmit={handleMagicLink} className="space-y-3">
+          <input 
+            type="email" 
+            placeholder="Enter your email"
+            className="w-full p-4 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:border-pok-blue focus:bg-white focus:outline-none font-bold"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={sent}
+          />
+          <button 
+            type="submit"
+            disabled={sent}
+            className="w-full bg-pok-blue text-white py-4 rounded-2xl font-bold text-lg hover:bg-pok-light-blue transition-all active:scale-95 disabled:bg-gray-300"
+          >
+            {sent ? 'Link Sent!' : 'Send Magic Link'}
+          </button>
+        </form>
+
+        <div className="relative flex items-center py-4">
+          <div className="flex-grow border-t border-gray-100"></div>
+          <span className="flex-shrink mx-4 text-gray-400 text-xs font-bold uppercase tracking-widest">or</span>
+          <div className="flex-grow border-t border-gray-100"></div>
+        </div>
+
         <button 
-          onClick={handleLogin}
+          onClick={handleGoogleLogin}
           className="w-full bg-white border-2 border-gray-100 py-4 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3 hover:bg-gray-50 transition-all active:scale-95"
         >
           <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
