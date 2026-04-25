@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isOwner(creatorId) {
+      return isSignedIn() && request.auth.uid == creatorId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Creators collection
+    match /creators/{creatorId} {
+      allow read: if isAdmin() || isOwner(creatorId);
+      allow write: if isAdmin();
+    }
+
+    // Videos collection
+    match /videos/{videoId} {
+      allow read: if isAdmin() || isOwner(resource.data.creatorId);
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Agreements collection
+    match /agreements/{agreementId} {
+      allow read: if isAdmin() || isOwner(resource.data.creatorId);
+      allow write: if isAdmin();
+      allow update: if isOwner(resource.data.creatorId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['accepted', 'acceptedAt']);
+    }
+
+    // Payouts collection
+    match /payouts/{payoutId} {
+      allow read: if isAdmin() || isOwner(resource.data.creatorId);
+      allow write: if isAdmin();
+    }
+  }
+}
