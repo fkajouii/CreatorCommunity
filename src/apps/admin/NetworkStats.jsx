@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Users, Eye, DollarSign } from 'lucide-react';
 import { db } from '../../services/firebase';
-import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, limit, where } from 'firebase/firestore';
 import { PAYOUT_STATUS, CREATOR_STATUS } from '../../types/schema';
 
 const NetworkStats = () => {
@@ -136,10 +136,10 @@ const NetworkStats = () => {
         {/* Efficiency Stats */}
         <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'Avg CPV', value: `$${stats.avgCpv.toFixed(2)}`, icon: DollarSign, color: 'bg-green-100 text-pok-green' },
-            { label: 'Engagement', value: `${stats.engagement}%`, icon: TrendingUp, color: 'bg-blue-100 text-pok-blue' },
-            { label: 'New Leads', value: stats.newLeads.toString(), icon: Users, color: 'bg-yellow-100 text-pok-yellow' },
-            { label: 'Total Paid', value: `$${(stats.totalPaid/1000).toFixed(1)}k`, icon: Eye, color: 'bg-red-100 text-pok-red' },
+            { label: 'Avg CPV', value: `$${(stats.avgCpv || 0).toFixed(2)}`, icon: DollarSign, color: 'bg-green-100 text-pok-green' },
+            { label: 'Engagement', value: `${(stats.engagement || 0)}%`, icon: TrendingUp, color: 'bg-blue-100 text-pok-blue' },
+            { label: 'New Leads', value: (stats.newLeads || 0).toString(), icon: Users, color: 'bg-yellow-100 text-pok-yellow' },
+            { label: 'Total Paid', value: `$${((stats.totalPaid || 0)/1000).toFixed(1)}k`, icon: Eye, color: 'bg-red-100 text-pok-red' },
           ].map((stat, i) => (
             <div key={i} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between">
               <div className={`${stat.color} w-10 h-10 rounded-xl flex items-center justify-center mb-4`}>
