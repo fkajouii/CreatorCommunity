@@ -54,12 +54,35 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => signOut(auth);
 
+  const sendMagicLink = async (email) => {
+    const actionCodeSettings = {
+      url: window.location.origin + '/login',
+      handleCodeInApp: true,
+    };
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem('emailForSignIn', email);
+  };
+
+  const completeMagicLinkSignIn = async () => {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = window.prompt('Please provide your email for confirmation');
+      }
+      const result = await signInWithEmailLink(auth, email, window.location.href);
+      window.localStorage.removeItem('emailForSignIn');
+      return result;
+    }
+  };
+
   const value = {
     user,
     isAdmin,
     loading,
     loginWithGoogle,
-    logout
+    logout,
+    sendMagicLink,
+    completeMagicLinkSignIn
   };
 
   return (
